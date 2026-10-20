@@ -5,7 +5,7 @@ Trabajo Práctico Integrador de la materia **Programación III** de la **UTN —
 - **Materia:** Programación III
 - **Entrega:** TPI — Frontend de una librería
 - **Revisor de la unidad:** Prof. Matías Torres
-- **Etapa actual:** Ejercicio 1 — Estructura y pantallas HTML (maqueta estática)
+- **Etapa actual:** Ejercicio 2 — Presentación con CSS y uso adaptable
 
 ## Integrantes del equipo
 
@@ -94,7 +94,8 @@ Estos IDs son un contrato público: los ejercicios siguientes (CSS, datos, altas
 | Historial: listado y detalle | Maqueta estática | Detalle inmutable desde valores históricos (Ejercicio 5) |
 | Mensajes de estado (`.mensaje`, `*-feedback`, `*-vacio`) | Presentes en el HTML, ocultos (`hidden`) | Activación y textos desde JavaScript (Ejercicios 3–5) |
 | Selects de editorial, género y autores | Opciones de ejemplo estáticas | Generados desde los datos locales (Ejercicio 4) |
-| Estilos | CSS mínimo propio (`css/estilos.css`) para legibilidad | Identidad visual completa, Flexbox/Grid y responsive 320 px / 1280 px (Ejercicio 2) |
+| Estilos | CSS propio completo (`css/estilos.css`): identidad visual con variables, Flexbox/Grid, adaptación 320 px / 1280 px y foco visible (Ejercicio 2) | Mantener la coherencia visual al agregar los comportamientos dinámicos (Ejercicios 3–6) |
+| Accesibilidad visual | Foco visible con `:focus-visible`; mensajes de estado y listas vacías diferenciados por borde e ícono, no solo por color | Conservar esos estados cuando JavaScript los active (Ejercicios 3–5) |
 | Persistencia | No implementada | `localStorage` (Ejercicio 6) |
 
 ## Casos de prueba manuales
@@ -112,14 +113,27 @@ Los 8 casos obligatorios de la consigna (`openspec/consignas.md`):
 | 7 | Recarga después de altas y venta | Se recuperan datos sin duplicar ejemplos ni ventas |
 | 8 | Navegación por teclado y anchos de 320 px y 1280 px | Foco visible, controles utilizables y tabla con desplazamiento propio si lo necesita |
 
-> Los casos 1 a 7 se ejecutan sobre la versión completa del TPI (Ejercicios 3 a 6); hoy el proyecto está en la Etapa 1 (maqueta HTML del Ejercicio 1). El caso 8 se puede recorrer parcialmente ya con la maqueta.
+> Los casos 1 a 7 se ejecutan sobre la versión completa del TPI (Ejercicios 3 a 6); hoy el proyecto está en la Etapa 2 (CSS del Ejercicio 2). El caso 8 se verificó sobre la maqueta estilizada y se vuelve a comprobar en el cierre.
+
+### Registro de verificación — caso 8 (Ejercicio 2)
+
+Verificación realizada el 20/10/2026 abriendo `index.html` por `file://` en Microsoft Edge (motor Chromium), con navegación por teclado y anchos de viewport de 320 px y 1280 px.
+
+| Comprobación | Resultado observado |
+|---|---|
+| Scroll horizontal de página | Ausente en 320 px y en 1280 px: `html` y `body` no provocan desplazamiento horizontal |
+| Tablas anchas | Se desplazan únicamente dentro de `.tabla-contenedor` (`overflow-x: auto`); la página permanece fija |
+| Navegación por teclado | Tab recorre en orden los 5 enlaces, el buscador, todos los campos, selectores y botones |
+| Foco visible | `:focus-visible` con `outline` de 3 px y `offset` de 2 px en todos los controles; en la cabecera se usa un tono claro de alto contraste |
+| Mensajes de estado | Éxito (✓), error (✕) y listas vacías (—) se distinguen por borde e ícono además del color; los 9 elementos `[hidden]` permanecen ocultos |
+| Formularios y controles | Legibles y utilizables en 320 px (una columna, botones a ancho completo) y en 1280 px (grilla de varias columnas con contenido centrado) |
 
 ## Estructura del proyecto
 
 ```
 index.html        ← entrada única (doble clic)
-css/estilos.css   ← estilos mínimos de la maqueta
-js/app.js         ← JavaScript nativo (en el Ejercicio 1 solo contiene un comentario; la lógica llega en los Ejercicios 3 a 6)
+css/estilos.css   ← identidad visual, layout adaptable y accesibilidad (Ejercicio 2)
+js/app.js         ← JavaScript nativo (aún sin lógica; la funcionalidad llega en los Ejercicios 3 a 6)
 openspec/         ← especificaciones del trabajo (consignas.md y changes/)
 README.md         ← este archivo
 ```
