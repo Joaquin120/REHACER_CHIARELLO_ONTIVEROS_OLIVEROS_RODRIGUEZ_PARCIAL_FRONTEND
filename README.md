@@ -11,11 +11,11 @@ Trabajo Práctico Integrador de la materia **Programación III** de la **UTN —
 
 - Joaquín Chiarello
 
-- Santiago Ontiveros
+- Santiago Ontivero
 
-- Cristian Oliveros
+- Cristian Rodríguez
 
-- Joseph Rodríguez
+- Joseph Oliveros
 
 
 > **Nota:** completar nombre, apellido y DNI de cada integrante antes de entregar.
