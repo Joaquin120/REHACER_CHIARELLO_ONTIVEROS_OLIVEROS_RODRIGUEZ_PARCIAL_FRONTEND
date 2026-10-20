@@ -1,0 +1,9 @@
+/* Placeholder base para Ejercicio 2 (Santiago Ontiveros) */
+* {
+  box-sizing: border-box;
+}
+
+.tabla-contenedor {
+  overflow-x: auto;
+  max-width: 100%;
+}
