@@ -5,7 +5,7 @@ Trabajo Práctico Integrador de la materia **Programación III** de la **UTN —
 - **Materia:** Programación III
 - **Entrega:** TPI — Frontend de una librería
 - **Revisor de la unidad:** Prof. Matías Torres
-- **Etapa actual:** Ejercicio 1 — Estructura y pantallas HTML (maqueta estática)
+- **Etapa actual:** Ejercicio 3 y parte de libros del Ejercicio 4 — datos locales, catálogo dinámico, filtro por título y alta de libros funcionales
 
 ## Integrantes del equipo
 
@@ -83,17 +83,17 @@ Estos IDs son un contrato público: los ejercicios siguientes (CSS, datos, altas
 | Parte | Estado actual | Qué falta (ejercicios siguientes) |
 |---|---|---|
 | Navegación por anclas entre las 5 vistas | Funcional (HTML nativo) | Señalar la vista actual con `aria-current` desde JS |
-| Catálogo: listado y datos de ejemplo | Maqueta estática | Generar desde arrays de datos (Ejercicio 3) |
-| Catálogo: buscador por título | Maqueta estática | Filtro con JavaScript (Ejercicio 3) |
-| Libros: formulario de alta | Maqueta estática («Sin clasificar» por defecto en género) | Validaciones y alta con `preventDefault` (Ejercicio 4) |
-| Libros: listado de registrados | Maqueta estática | Renderizado dinámico (Ejercicio 4) |
+| Catálogo: listado y datos de ejemplo | Funcional (JS) — `js/app.js` genera el listado desde los datos locales (Ejercicio 3) | — |
+| Catálogo: buscador por título | Funcional (JS) — filtro insensible a mayúsculas, parcial y con `trim` (Ejercicio 3) | — |
+| Libros: formulario de alta | Funcional para libros (JS): selectores dinámicos y validaciones con `preventDefault` (Ejercicio 4) | Alta de clientes (Ejercicio 4) |
+| Libros: listado de registrados | Funcional (JS) — renderizado dinámico con estado vacío (Ejercicio 4) | — |
 | Clientes: formulario de alta | Maqueta estática | Validaciones y alta con `preventDefault` (Ejercicio 4) |
 | Clientes: listado de registrados | Maqueta estática | Renderizado dinámico (Ejercicio 4) |
 | Ventas: composición y renglones | Maqueta estática | Agregar/modificar renglones, cálculo de subtotales y total (Ejercicio 5) |
 | Ventas: confirmación | Maqueta estática | Registro de la venta y mensaje de resultado (Ejercicio 5) |
 | Historial: listado y detalle | Maqueta estática | Detalle inmutable desde valores históricos (Ejercicio 5) |
-| Mensajes de estado (`.mensaje`, `*-feedback`, `*-vacio`) | Presentes en el HTML, ocultos (`hidden`) | Activación y textos desde JavaScript (Ejercicios 3–5) |
-| Selects de editorial, género y autores | Opciones de ejemplo estáticas | Generados desde los datos locales (Ejercicio 4) |
+| Mensajes de estado (`.mensaje`, `*-feedback`, `*-vacio`) | Catálogo y libros: activados desde JS. Resto: ocultos (`hidden`) | Activación y textos desde JavaScript para clientes, ventas e historial (Ejercicios 4–5) |
+| Selects de editorial, género y autores | Funcional (JS) — opciones generadas desde los datos locales (Ejercicio 4) | — |
 | Estilos | CSS mínimo propio (`css/estilos.css`) para legibilidad | Identidad visual completa, Flexbox/Grid y responsive 320 px / 1280 px (Ejercicio 2) |
 | Persistencia | No implementada | `localStorage` (Ejercicio 6) |
 
@@ -112,14 +112,14 @@ Los 8 casos obligatorios de la consigna (`openspec/consignas.md`):
 | 7 | Recarga después de altas y venta | Se recuperan datos sin duplicar ejemplos ni ventas |
 | 8 | Navegación por teclado y anchos de 320 px y 1280 px | Foco visible, controles utilizables y tabla con desplazamiento propio si lo necesita |
 
-> Los casos 1 a 7 se ejecutan sobre la versión completa del TPI (Ejercicios 3 a 6); hoy el proyecto está en la Etapa 1 (maqueta HTML del Ejercicio 1). El caso 8 se puede recorrer parcialmente ya con la maqueta.
+> Hoy ya se pueden ejecutar los casos 1 y 2 en lo que respecta al catálogo y a las altas de libros (Ejercicio 3 y parte de libros del Ejercicio 4). Los casos 3 a 7 requieren la versión completa del TPI (resto del Ejercicio 4, Ejercicios 5 y 6). El caso 8 se puede recorrer con la maqueta.
 
 ## Estructura del proyecto
 
 ```
 index.html        ← entrada única (doble clic)
 css/estilos.css   ← estilos mínimos de la maqueta
-js/app.js         ← JavaScript nativo (en el Ejercicio 1 solo contiene un comentario; la lógica llega en los Ejercicios 3 a 6)
+js/app.js         ← JavaScript nativo (Ejercicio 3 y parte de libros del Ejercicio 4 implementados; faltan clientes, ventas y persistencia)
 openspec/         ← especificaciones del trabajo (consignas.md y changes/)
 README.md         ← este archivo
 ```
