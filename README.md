@@ -5,8 +5,7 @@ Trabajo Práctico Integrador de la materia **Programación III** de la **UTN —
 - **Materia:** Programación III
 - **Entrega:** TPI — Frontend de una librería
 - **Revisor de la unidad:** Prof. Matías Torres
-- **Etapa actual:** Ejercicio 2 — Presentación con CSS y uso adaptable
-- **Etapa actual:** Ejercicio 3 y parte de libros del Ejercicio 4 — datos locales, catálogo dinámico, filtro por título y alta de libros funcionales
+- **Estado del proyecto:** TPI Finalizado — Versión completa (Ejercicios 1 a 6 implementados)
 
 ## Integrantes del equipo
 
@@ -78,26 +77,17 @@ Estos IDs son un contrato público: los ejercicios siguientes (CSS, datos, altas
 
 ## Estado de la maqueta vs. dinámico
 
-| Parte | Estado actual | Qué falta (ejercicios siguientes) |
-|---|---|---|
-| Navegación por anclas entre las 5 vistas | Funcional (HTML nativo) | Señalar la vista actual con `aria-current` desde JS |
-| Catálogo: listado y datos de ejemplo | Funcional (JS) — `js/app.js` genera el listado desde los datos locales (Ejercicio 3) | — |
-| Catálogo: buscador por título | Funcional (JS) — filtro insensible a mayúsculas, parcial y con `trim` (Ejercicio 3) | — |
-| Libros: formulario de alta | Funcional para libros (JS): selectores dinámicos y validaciones con `preventDefault` (Ejercicio 4) | Alta de clientes (Ejercicio 4) |
-| Libros: listado de registrados | Funcional (JS) — renderizado dinámico con estado vacío (Ejercicio 4) | — |
-| Clientes: formulario de alta | Maqueta estática | Validaciones y alta con `preventDefault` (Ejercicio 4) |
-| Clientes: listado de registrados | Maqueta estática | Renderizado dinámico (Ejercicio 4) |
-| Ventas: composición y renglones | Maqueta estática | Agregar/modificar renglones, cálculo de subtotales y total (Ejercicio 5) |
-| Ventas: confirmación | Maqueta estática | Registro de la venta y mensaje de resultado (Ejercicio 5) |
-| Historial: listado y detalle | Maqueta estática | Detalle inmutable desde valores históricos (Ejercicio 5) |
-| Mensajes de estado (`.mensaje`, `*-feedback`, `*-vacio`) | Presentes en el HTML, ocultos (`hidden`) | Activación y textos desde JavaScript (Ejercicios 3–5) |
-| Selects de editorial, género y autores | Opciones de ejemplo estáticas | Generados desde los datos locales (Ejercicio 4) |
-| Estilos | CSS propio completo (`css/estilos.css`): identidad visual con variables, Flexbox/Grid, adaptación 320 px / 1280 px y foco visible (Ejercicio 2) | Mantener la coherencia visual al agregar los comportamientos dinámicos (Ejercicios 3–6) |
-| Accesibilidad visual | Foco visible con `:focus-visible`; mensajes de estado y listas vacías diferenciados por borde e ícono, no solo por color | Conservar esos estados cuando JavaScript los active (Ejercicios 3–5) |
-| Mensajes de estado (`.mensaje`, `*-feedback`, `*-vacio`) | Catálogo y libros: activados desde JS. Resto: ocultos (`hidden`) | Activación y textos desde JavaScript para clientes, ventas e historial (Ejercicios 4–5) |
-| Selects de editorial, género y autores | Funcional (JS) — opciones generadas desde los datos locales (Ejercicio 4) | — |
-| Estilos | CSS mínimo propio (`css/estilos.css`) para legibilidad | Identidad visual completa, Flexbox/Grid y responsive 320 px / 1280 px (Ejercicio 2) |
-| Persistencia | No implementada | `localStorage` (Ejercicio 6) |
+| Parte | Estado actual |
+|---|---|
+| Navegación por anclas entre las 5 vistas | Funcional (HTML nativo y `aria-current`) |
+| Catálogo: listado, datos de ejemplo y buscador | Funcional (JS) — generado y filtrado desde datos locales (Ejercicio 3) |
+| Libros: formulario de alta y listado | Funcional (JS) — selectores dinámicos, validaciones y renderizado (Ejercicio 4) |
+| Clientes: formulario de alta y listado | Funcional (JS) — validaciones, altas y renderizado dinámico (Ejercicio 4) |
+| Ventas: composición, renglones y confirmación | Funcional (JS) — cálculo de subtotales, totales y registro de ventas (Ejercicio 5) |
+| Historial: listado y detalle | Funcional (JS) — detalle inmutable desde valores históricos (Ejercicio 5) |
+| Mensajes de estado y selects dinámicos | Funcional (JS) — activados dinámicamente en todas las vistas |
+| Estilos y Accesibilidad visual | CSS completo (`css/estilos.css`) con foco visible, Flexbox/Grid y adaptabilidad 320 px / 1280 px (Ejercicio 2) |
+| Persistencia | Funcional — sincronización completa con `localStorage` (Ejercicio 6) |
 
 ## Casos de prueba manuales
 
@@ -114,8 +104,6 @@ Los 8 casos obligatorios de la consigna (`openspec/consignas.md`):
 | 7 | Recarga después de altas y venta | Se recuperan datos sin duplicar ejemplos ni ventas |
 | 8 | Navegación por teclado y anchos de 320 px y 1280 px | Foco visible, controles utilizables y tabla con desplazamiento propio si lo necesita |
 
-> Los casos 1 a 7 se ejecutan sobre la versión completa del TPI (Ejercicios 3 a 6); hoy el proyecto está en la Etapa 2 (CSS del Ejercicio 2). El caso 8 se verificó sobre la maqueta estilizada y se vuelve a comprobar en el cierre.
-
 ### Registro de verificación — caso 8 (Ejercicio 2)
 
 Verificación realizada el 20/10/2026 abriendo `index.html` por `file://` en Microsoft Edge (motor Chromium), con navegación por teclado y anchos de viewport de 320 px y 1280 px.
@@ -128,16 +116,13 @@ Verificación realizada el 20/10/2026 abriendo `index.html` por `file://` en Mic
 | Foco visible | `:focus-visible` con `outline` de 3 px y `offset` de 2 px en todos los controles; en la cabecera se usa un tono claro de alto contraste |
 | Mensajes de estado | Éxito (✓), error (✕) y listas vacías (—) se distinguen por borde e ícono además del color; los 9 elementos `[hidden]` permanecen ocultos |
 | Formularios y controles | Legibles y utilizables en 320 px (una columna, botones a ancho completo) y en 1280 px (grilla de varias columnas con contenido centrado) |
-> Hoy ya se pueden ejecutar los casos 1 y 2 en lo que respecta al catálogo y a las altas de libros (Ejercicio 3 y parte de libros del Ejercicio 4). Los casos 3 a 7 requieren la versión completa del TPI (resto del Ejercicio 4, Ejercicios 5 y 6). El caso 8 se puede recorrer con la maqueta.
 
 ## Estructura del proyecto
 
 ```
 index.html        ← entrada única (doble clic)
 css/estilos.css   ← identidad visual, layout adaptable y accesibilidad (Ejercicio 2)
-js/app.js         ← JavaScript nativo (aún sin lógica; la funcionalidad llega en los Ejercicios 3 a 6)
-css/estilos.css   ← estilos mínimos de la maqueta
-js/app.js         ← JavaScript nativo (Ejercicio 3 y parte de libros del Ejercicio 4 implementados; faltan clientes, ventas y persistencia)
+js/app.js         ← JavaScript nativo (Ejercicio 3 y parte de libros del Ejercicio 4 implementados)
 openspec/         ← especificaciones del trabajo (consignas.md y changes/)
 README.md         ← este archivo
 ```
