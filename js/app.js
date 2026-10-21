@@ -1,7 +1,7 @@
 // JavaScript nativo del TPI — Librería El Faro de los Libros.
-// Ejercicio 3 (datos locales, catálogo y filtro) y Ejercicio 4 — parte libros
-// (selectores dinámicos y alta de libros). Vanilla JS, sin fetch ni librerías.
-// Se abre con doble clic en index.html (file://); el script va con `defer`.
+// Ejercicio 3, Ejercicio 4 completo (libros y clientes), Ejercicio 5 (ventas e
+// historial) y Ejercicio 6 (persistencia con localStorage). Vanilla JS, sin
+// fetch ni librerías. Se abre con doble clic en index.html (file://).
 
 'use strict';
 
@@ -45,8 +45,129 @@ const clientes = [
   { id: 3, nombreCompleto: 'Elena Fuentes', email: 'elena.fuentes@correo.test' }
 ];
 
+const ventas = [];
+
 // ============================================================
-// 2. HELPERS (búsquedas por id, formato y normalización)
+// 2. PERSISTENCIA (localStorage, clave versionada)
+// ============================================================
+
+const CLAVE_ALMACENAMIENTO = 'libreriaElFaro.v1';
+const VERSION_DATOS = 1;
+
+function hayAlmacenamiento() {
+  try {
+    const clavePrueba = '__libreria_el_faro_prueba__';
+    window.localStorage.setItem(clavePrueba, '1');
+    window.localStorage.removeItem(clavePrueba);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+function esModeloValido(modelo) {
+  if (!modelo || typeof modelo !== 'object') {
+    return false;
+  }
+  if (modelo.version !== VERSION_DATOS) {
+    return false;
+  }
+  if (!Array.isArray(modelo.libros) || !Array.isArray(modelo.clientes) || !Array.isArray(modelo.ventas)) {
+    return false;
+  }
+
+  const librosValidos = modelo.libros.every(function (libro) {
+    return libro && typeof libro.id === 'number' &&
+      typeof libro.titulo === 'string' &&
+      typeof libro.isbn === 'string' &&
+      typeof libro.precio === 'number' && Number.isFinite(libro.precio) &&
+      typeof libro.idEditorial === 'number' &&
+      (libro.idGenero === null || typeof libro.idGenero === 'number') &&
+      Array.isArray(libro.autores);
+  });
+
+  const clientesValidos = modelo.clientes.every(function (cliente) {
+    return cliente && typeof cliente.id === 'number' &&
+      typeof cliente.nombreCompleto === 'string' &&
+      typeof cliente.email === 'string';
+  });
+
+  const ventasValidas = modelo.ventas.every(function (venta) {
+    return venta && typeof venta.id === 'string' &&
+      typeof venta.fecha === 'string' &&
+      typeof venta.idCliente === 'number' &&
+      typeof venta.nombreCliente === 'string' &&
+      typeof venta.total === 'number' && Number.isFinite(venta.total) &&
+      Array.isArray(venta.renglones) &&
+      venta.renglones.every(function (renglon) {
+        return renglon && typeof renglon.idLibro === 'number' &&
+          typeof renglon.titulo === 'string' &&
+          typeof renglon.cantidad === 'number' &&
+          typeof renglon.precioUnitario === 'number' &&
+          typeof renglon.subtotal === 'number';
+      });
+  });
+
+  return librosValidos && clientesValidos && ventasValidas;
+}
+
+function cargarDatos() {
+  if (!hayAlmacenamiento()) {
+    return false;
+  }
+
+  let crudo = null;
+  try {
+    crudo = window.localStorage.getItem(CLAVE_ALMACENAMIENTO);
+  } catch (error) {
+    return false;
+  }
+
+  if (crudo === null) {
+    return false;
+  }
+
+  let modelo = null;
+  try {
+    modelo = JSON.parse(crudo);
+  } catch (error) {
+    modelo = null;
+  }
+
+  if (!esModeloValido(modelo)) {
+    try {
+      window.localStorage.removeItem(CLAVE_ALMACENAMIENTO);
+    } catch (error) {
+      // Sin almacenamiento disponible: se continúa con los ejemplos en memoria.
+    }
+    return false;
+  }
+
+  libros.splice(0, libros.length, ...modelo.libros);
+  clientes.splice(0, clientes.length, ...modelo.clientes);
+  ventas.splice(0, ventas.length, ...modelo.ventas);
+  return true;
+}
+
+function guardarDatos() {
+  if (!hayAlmacenamiento()) {
+    return false;
+  }
+  try {
+    window.localStorage.setItem(CLAVE_ALMACENAMIENTO, JSON.stringify({
+      version: VERSION_DATOS,
+      libros: libros,
+      clientes: clientes,
+      ventas: ventas
+    }));
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+// ============================================================
+// 3. HELPERS (búsquedas por id, formato y normalización)
 // ============================================================
 
 function buscarEditorialPorId(id) {
@@ -61,6 +182,18 @@ function buscarAutoresPorIds(ids) {
   return ids
     .map(function (id) { return autores.find(function (autor) { return autor.id === id; }) || null; })
     .filter(function (autor) { return autor !== null; });
+}
+
+function buscarLibroPorId(id) {
+  return libros.find(function (libro) { return libro.id === id; }) || null;
+}
+
+function buscarClientePorId(id) {
+  return clientes.find(function (cliente) { return cliente.id === id; }) || null;
+}
+
+function buscarVentaPorId(id) {
+  return ventas.find(function (venta) { return venta.id === id; }) || null;
 }
 
 // «Sin clasificar» es la representación de la ausencia de género.
@@ -88,6 +221,16 @@ function formatearPrecio(valor) {
   return '$' + Number(valor).toFixed(2).replace('.', ',');
 }
 
+function formatearFecha(fechaISO) {
+  const fecha = new Date(fechaISO);
+  if (isNaN(fecha.getTime())) {
+    return String(fechaISO);
+  }
+  const dia = String(fecha.getDate()).padStart(2, '0');
+  const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+  return dia + '/' + mes + '/' + fecha.getFullYear();
+}
+
 // ISBN comparable: se ignoran espacios, guiones y mayúsculas/minúsculas.
 function normalizarIsbn(isbn) {
   return String(isbn).replace(/[\s-]/g, '').toUpperCase();
@@ -100,8 +243,24 @@ function proximoIdLibro() {
   return Math.max.apply(null, libros.map(function (libro) { return libro.id; })) + 1;
 }
 
+function proximoIdCliente() {
+  if (clientes.length === 0) {
+    return 1;
+  }
+  return Math.max.apply(null, clientes.map(function (cliente) { return cliente.id; })) + 1;
+}
+
+function proximoIdVenta() {
+  const numeros = ventas.map(function (venta) {
+    const numero = parseInt(String(venta.id).replace(/[^0-9]/g, ''), 10);
+    return Number.isNaN(numero) ? 0 : numero;
+  });
+  const mayor = numeros.length > 0 ? Math.max.apply(null, numeros) : 0;
+  return 'V-' + String(mayor + 1).padStart(4, '0');
+}
+
 // ============================================================
-// 3. RENDERIZADO (todas las inserciones son texto, no HTML)
+// 4. RENDERIZADO DE LIBROS Y CATÁLOGO (Ejercicios 3 y 4)
 // ============================================================
 
 function crearFilaLibro(libro) {
@@ -130,8 +289,6 @@ function renderFilasLibros(tabla, lista) {
     cuerpo.appendChild(crearFilaLibro(libro));
   });
 }
-
-// --- Catálogo (Ejercicio 3) ---------------------------------
 
 function filtrarLibrosPorTitulo(termino) {
   const consulta = String(termino).trim().toLowerCase();
@@ -173,8 +330,6 @@ function renderCatalogo() {
   renderFilasLibros(tabla, coincidencias);
 }
 
-// --- Libros registrados (Ejercicio 4, parte libros) ---------
-
 function renderTablaLibrosRegistrados() {
   const mensajeVacio = document.getElementById('libros-listado-vacio');
   const tabla = document.getElementById('tabla-libros');
@@ -193,7 +348,7 @@ function renderTablaLibrosRegistrados() {
 }
 
 // ============================================================
-// 4. SELECTORES DINÁMICOS (formularios y venta)
+// 5. SELECTORES DINÁMICOS (libros, clientes y venta)
 // ============================================================
 
 function cargarSelectoresLibro() {
@@ -225,8 +380,6 @@ function cargarSelectoresLibro() {
   });
 }
 
-// El selector de libro de la venta lo mantiene actualizado el Ejercicio 5;
-// aquí solo se reflejan los libros existentes (incluidos los nuevos).
 function actualizarSelectorVentaLibro() {
   const selectVentaLibro = document.getElementById('venta-libro');
   selectVentaLibro.textContent = '';
@@ -239,8 +392,452 @@ function actualizarSelectorVentaLibro() {
   });
 }
 
+function actualizarSelectorVentaCliente() {
+  const selectVentaCliente = document.getElementById('venta-cliente');
+  selectVentaCliente.textContent = '';
+  const placeholder = new Option('Seleccione un cliente', '');
+  placeholder.disabled = true;
+  placeholder.selected = true;
+  selectVentaCliente.appendChild(placeholder);
+  clientes.forEach(function (cliente) {
+    selectVentaCliente.appendChild(new Option(cliente.nombreCompleto + ' — ' + cliente.email, String(cliente.id)));
+  });
+}
+
+function cargarSelectoresVenta() {
+  actualizarSelectorVentaCliente();
+  actualizarSelectorVentaLibro();
+}
+
 // ============================================================
-// 5. ALTA DE LIBROS (validación + preventDefault)
+// 6. CLIENTES (Ejercicio 4)
+// ============================================================
+
+function crearFilaCliente(cliente) {
+  const fila = document.createElement('tr');
+  [cliente.nombreCompleto, cliente.email].forEach(function (texto) {
+    const celda = document.createElement('td');
+    celda.textContent = texto;
+    fila.appendChild(celda);
+  });
+  return fila;
+}
+
+function renderTablaClientes() {
+  const tabla = document.getElementById('tabla-clientes');
+  const cuerpo = tabla.querySelector('tbody');
+  const contenedorTabla = tabla.closest('.tabla-contenedor');
+  const mensajeVacio = document.getElementById('clientes-listado-vacio');
+
+  cuerpo.textContent = '';
+
+  if (clientes.length === 0) {
+    contenedorTabla.hidden = true;
+    mensajeVacio.hidden = false;
+    return;
+  }
+
+  mensajeVacio.hidden = true;
+  contenedorTabla.hidden = false;
+  clientes.forEach(function (cliente) {
+    cuerpo.appendChild(crearFilaCliente(cliente));
+  });
+}
+
+function emailValido(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function manejarAltaCliente(evento) {
+  evento.preventDefault();
+  const feedback = document.getElementById('clientes-feedback');
+  const formulario = document.getElementById('form-alta-cliente');
+  const nombre = document.getElementById('cliente-nombre').value.trim();
+  const email = document.getElementById('cliente-email').value.trim();
+  const errores = [];
+
+  if (nombre === '') {
+    errores.push('El nombre completo es obligatorio.');
+  }
+
+  if (email === '') {
+    errores.push('El email es obligatorio.');
+  } else if (!emailValido(email)) {
+    errores.push('El email debe tener un formato válido.');
+  } else {
+    const emailNormalizado = email.toLowerCase();
+    const duplicado = clientes.some(function (cliente) {
+      return cliente.email.trim().toLowerCase() === emailNormalizado;
+    });
+    if (duplicado) {
+      errores.push('El email ya está registrado (se compara sin espacios exteriores y sin distinguir mayúsculas de minúsculas).');
+    }
+  }
+
+  if (errores.length > 0) {
+    mostrarFeedback(feedback, false, 'No se pudo registrar el cliente. ' + errores.join(' '));
+    return;
+  }
+
+  clientes.push({
+    id: proximoIdCliente(),
+    nombreCompleto: nombre,
+    email: email
+  });
+
+  mostrarFeedback(feedback, true, 'Cliente registrado correctamente: «' + nombre + '» (' + email + ').');
+  formulario.reset();
+
+  renderTablaClientes();
+  actualizarSelectorVentaCliente();
+  guardarDatos();
+}
+
+// ============================================================
+// 7. VENTAS (Ejercicio 5)
+// ============================================================
+
+let renglonesVenta = [];
+
+function calcularSubtotalRenglon(renglon) {
+  return renglon.cantidad * renglon.precioUnitario;
+}
+
+function calcularTotalVenta() {
+  return renglonesVenta.reduce(function (total, renglon) {
+    return total + renglon.subtotal;
+  }, 0);
+}
+
+function actualizarTotalVenta() {
+  document.getElementById('venta-total').textContent = formatearPrecio(calcularTotalVenta());
+}
+
+function validarCantidad(valor) {
+  const cantidad = Number(valor);
+  if (!Number.isInteger(cantidad) || cantidad <= 0) {
+    return null;
+  }
+  return cantidad;
+}
+
+function renderRenglonesVenta() {
+  const tabla = document.getElementById('tabla-renglones');
+  const cuerpo = tabla.querySelector('tbody');
+  const contenedorTabla = tabla.closest('.tabla-contenedor');
+  const mensajeVacio = document.getElementById('renglones-listado-vacio');
+
+  cuerpo.textContent = '';
+
+  if (renglonesVenta.length === 0) {
+    contenedorTabla.hidden = true;
+    mensajeVacio.hidden = false;
+    actualizarTotalVenta();
+    return;
+  }
+
+  mensajeVacio.hidden = true;
+  contenedorTabla.hidden = false;
+
+  renglonesVenta.forEach(function (renglon) {
+    const fila = document.createElement('tr');
+
+    const celdaLibro = document.createElement('td');
+    celdaLibro.textContent = renglon.titulo;
+    fila.appendChild(celdaLibro);
+
+    const celdaCantidad = document.createElement('td');
+    const entradaCantidad = document.createElement('input');
+    entradaCantidad.type = 'number';
+    entradaCantidad.min = '1';
+    entradaCantidad.step = '1';
+    entradaCantidad.value = String(renglon.cantidad);
+    entradaCantidad.className = 'renglon-cantidad';
+    entradaCantidad.setAttribute('aria-label', 'Cantidad de ' + renglon.titulo + ' en la venta');
+    entradaCantidad.dataset.idLibro = String(renglon.idLibro);
+    entradaCantidad.addEventListener('change', function () {
+      manejarCambioCantidad(renglon.idLibro, entradaCantidad);
+    });
+    celdaCantidad.appendChild(entradaCantidad);
+    fila.appendChild(celdaCantidad);
+
+    const celdaPrecio = document.createElement('td');
+    celdaPrecio.textContent = formatearPrecio(renglon.precioUnitario);
+    fila.appendChild(celdaPrecio);
+
+    const celdaSubtotal = document.createElement('td');
+    celdaSubtotal.textContent = formatearPrecio(renglon.subtotal);
+    fila.appendChild(celdaSubtotal);
+
+    const celdaAcciones = document.createElement('td');
+    const botonQuitar = document.createElement('button');
+    botonQuitar.type = 'button';
+    botonQuitar.className = 'renglon-quitar';
+    botonQuitar.textContent = 'Quitar ' + renglon.titulo + ' de la venta';
+    botonQuitar.addEventListener('click', function () {
+      manejarQuitarRenglon(renglon.idLibro);
+    });
+    celdaAcciones.appendChild(botonQuitar);
+    fila.appendChild(celdaAcciones);
+
+    cuerpo.appendChild(fila);
+  });
+
+  actualizarTotalVenta();
+}
+
+function manejarAgregarRenglon() {
+  const feedback = document.getElementById('venta-feedback');
+  const selectLibro = document.getElementById('venta-libro');
+  const campoCantidad = document.getElementById('venta-cantidad');
+  const idLibro = parseInt(selectLibro.value, 10);
+  const libro = buscarLibroPorId(idLibro);
+
+  if (!libro) {
+    mostrarFeedback(feedback, false, 'Debe seleccionar un libro existente para agregar el renglón.');
+    return;
+  }
+
+  const cantidad = validarCantidad(campoCantidad.value);
+  if (cantidad === null) {
+    mostrarFeedback(feedback, false, 'La cantidad debe ser un número entero mayor que cero.');
+    return;
+  }
+
+  if (renglonesVenta.some(function (renglon) { return renglon.idLibro === idLibro; })) {
+    mostrarFeedback(feedback, false, 'El libro ya está en la venta. Modificá la cantidad del renglón existente o quitalo para volver a agregarlo.');
+    return;
+  }
+
+  renglonesVenta.push({
+    idLibro: libro.id,
+    titulo: libro.titulo,
+    cantidad: cantidad,
+    precioUnitario: libro.precio,
+    subtotal: cantidad * libro.precio
+  });
+
+  renderRenglonesVenta();
+  mostrarFeedback(feedback, true, 'Renglón agregado: «' + libro.titulo + '» × ' + cantidad + '.');
+
+  selectLibro.selectedIndex = 0;
+  campoCantidad.value = '1';
+}
+
+function manejarCambioCantidad(idLibro, entrada) {
+  const feedback = document.getElementById('venta-feedback');
+  const renglon = renglonesVenta.find(function (item) { return item.idLibro === idLibro; });
+
+  if (!renglon) {
+    return;
+  }
+
+  const cantidad = validarCantidad(entrada.value);
+  if (cantidad === null) {
+    mostrarFeedback(feedback, false, 'La cantidad debe ser un número entero mayor que cero. Se conservó el valor anterior.');
+    entrada.value = String(renglon.cantidad);
+    return;
+  }
+
+  renglon.cantidad = cantidad;
+  renglon.subtotal = calcularSubtotalRenglon(renglon);
+  renderRenglonesVenta();
+  mostrarFeedback(feedback, true, 'Cantidad actualizada para «' + renglon.titulo + '».');
+}
+
+function manejarQuitarRenglon(idLibro) {
+  const feedback = document.getElementById('venta-feedback');
+  const renglon = renglonesVenta.find(function (item) { return item.idLibro === idLibro; });
+
+  renglonesVenta = renglonesVenta.filter(function (item) { return item.idLibro !== idLibro; });
+  renderRenglonesVenta();
+
+  if (renglon) {
+    mostrarFeedback(feedback, true, 'Renglón quitado: «' + renglon.titulo + '».');
+  }
+}
+
+function manejarConfirmarVenta() {
+  const feedback = document.getElementById('venta-feedback');
+  const selectCliente = document.getElementById('venta-cliente');
+  const idCliente = parseInt(selectCliente.value, 10);
+  const cliente = buscarClientePorId(idCliente);
+
+  if (!cliente) {
+    mostrarFeedback(feedback, false, 'Debe seleccionar un cliente existente para confirmar la venta.');
+    return;
+  }
+
+  if (renglonesVenta.length === 0) {
+    mostrarFeedback(feedback, false, 'La venta debe tener al menos un renglón para confirmarse.');
+    return;
+  }
+
+  const cantidadesValidas = renglonesVenta.every(function (renglon) {
+    return Number.isInteger(renglon.cantidad) && renglon.cantidad > 0;
+  });
+
+  if (!cantidadesValidas) {
+    mostrarFeedback(feedback, false, 'Todas las cantidades deben ser números enteros mayores que cero.');
+    return;
+  }
+
+  const renglonesHistoricos = renglonesVenta.map(function (renglon) {
+    return {
+      idLibro: renglon.idLibro,
+      titulo: renglon.titulo,
+      cantidad: renglon.cantidad,
+      precioUnitario: renglon.precioUnitario,
+      subtotal: renglon.cantidad * renglon.precioUnitario
+    };
+  });
+
+  const total = renglonesHistoricos.reduce(function (suma, renglon) {
+    return suma + renglon.subtotal;
+  }, 0);
+
+  const venta = {
+    id: proximoIdVenta(),
+    fecha: new Date().toISOString(),
+    idCliente: cliente.id,
+    nombreCliente: cliente.nombreCompleto,
+    renglones: renglonesHistoricos,
+    total: total
+  };
+
+  ventas.push(venta);
+  guardarDatos();
+  renderHistorial();
+  renderDetalleVenta(venta.id);
+
+  renglonesVenta = [];
+  selectCliente.selectedIndex = 0;
+  document.getElementById('venta-libro').selectedIndex = 0;
+  document.getElementById('venta-cantidad').value = '1';
+  renderRenglonesVenta();
+
+  mostrarFeedback(feedback, true, 'Venta ' + venta.id + ' confirmada por ' + formatearPrecio(total) + '.');
+}
+
+// ============================================================
+// 8. HISTORIAL Y DETALLE INMUTABLE (Ejercicio 5)
+// ============================================================
+
+function renderHistorial() {
+  const tabla = document.getElementById('tabla-historial');
+  const cuerpo = tabla.querySelector('tbody');
+  const contenedorTabla = tabla.closest('.tabla-contenedor');
+  const mensajeVacio = document.getElementById('historial-listado-vacio');
+
+  cuerpo.textContent = '';
+
+  if (ventas.length === 0) {
+    contenedorTabla.hidden = true;
+    mensajeVacio.hidden = false;
+    return;
+  }
+
+  mensajeVacio.hidden = true;
+  contenedorTabla.hidden = false;
+
+  ventas.forEach(function (venta) {
+    const fila = document.createElement('tr');
+    [venta.id, formatearFecha(venta.fecha), venta.nombreCliente, formatearPrecio(venta.total)].forEach(function (texto) {
+      const celda = document.createElement('td');
+      celda.textContent = texto;
+      fila.appendChild(celda);
+    });
+
+    const celdaDetalle = document.createElement('td');
+    const botonDetalle = document.createElement('button');
+    botonDetalle.type = 'button';
+    botonDetalle.className = 'historial-ver-detalle';
+    botonDetalle.dataset.idVenta = venta.id;
+    botonDetalle.textContent = 'Ver detalle de la venta ' + venta.id;
+    celdaDetalle.appendChild(botonDetalle);
+    fila.appendChild(celdaDetalle);
+
+    cuerpo.appendChild(fila);
+  });
+}
+
+function renderDetalleVenta(idVenta) {
+  const contenedor = document.getElementById('tabla-historial-detalle');
+  const venta = buscarVentaPorId(idVenta);
+  contenedor.textContent = '';
+
+  if (!venta) {
+    renderDetalleVacio();
+    return;
+  }
+
+  const contenedorTabla = document.createElement('div');
+  contenedorTabla.className = 'tabla-contenedor';
+
+  const tabla = document.createElement('table');
+  const caption = document.createElement('caption');
+  caption.textContent = 'Renglones de la venta ' + venta.id + ' (valores históricos)';
+  tabla.appendChild(caption);
+
+  const thead = document.createElement('thead');
+  const filaEncabezado = document.createElement('tr');
+  ['Libro', 'Cantidad', 'Precio unitario', 'Subtotal'].forEach(function (texto) {
+    const th = document.createElement('th');
+    th.scope = 'col';
+    th.textContent = texto;
+    filaEncabezado.appendChild(th);
+  });
+  thead.appendChild(filaEncabezado);
+  tabla.appendChild(thead);
+
+  const tbody = document.createElement('tbody');
+  venta.renglones.forEach(function (renglon) {
+    const fila = document.createElement('tr');
+    [renglon.titulo, String(renglon.cantidad), formatearPrecio(renglon.precioUnitario), formatearPrecio(renglon.subtotal)].forEach(function (texto) {
+      const celda = document.createElement('td');
+      celda.textContent = texto;
+      fila.appendChild(celda);
+    });
+    tbody.appendChild(fila);
+  });
+  tabla.appendChild(tbody);
+
+  const tfoot = document.createElement('tfoot');
+  const filaTotal = document.createElement('tr');
+  const thTotal = document.createElement('th');
+  thTotal.scope = 'row';
+  thTotal.colSpan = 3;
+  thTotal.textContent = 'Total de la venta';
+  filaTotal.appendChild(thTotal);
+  const tdTotal = document.createElement('td');
+  tdTotal.textContent = formatearPrecio(venta.total);
+  filaTotal.appendChild(tdTotal);
+  tfoot.appendChild(filaTotal);
+  tabla.appendChild(tfoot);
+
+  contenedorTabla.appendChild(tabla);
+  contenedor.appendChild(contenedorTabla);
+}
+
+function renderDetalleVacio() {
+  const contenedor = document.getElementById('tabla-historial-detalle');
+  contenedor.textContent = '';
+  const mensaje = document.createElement('p');
+  mensaje.className = 'listado-vacio';
+  mensaje.textContent = 'Seleccione una venta del historial para ver su detalle.';
+  contenedor.appendChild(mensaje);
+}
+
+function manejarClicHistorial(evento) {
+  const boton = evento.target.closest('.historial-ver-detalle');
+  if (!boton) {
+    return;
+  }
+  renderDetalleVenta(boton.dataset.idVenta);
+}
+
+// ============================================================
+// 9. ALTA DE LIBROS (Ejercicio 4, parte libros)
 // ============================================================
 
 function validarLibro(datos) {
@@ -346,16 +943,25 @@ function manejarAltaLibro(evento) {
   renderCatalogo();
   renderTablaLibrosRegistrados();
   actualizarSelectorVentaLibro();
+  guardarDatos();
 }
 
 // ============================================================
-// 6. INICIALIZACIÓN Y EVENTOS
+// 10. INICIALIZACIÓN Y EVENTOS
 // ============================================================
 
 function inicializar() {
+  if (!cargarDatos()) {
+    guardarDatos();
+  }
+
   cargarSelectoresLibro();
-  actualizarSelectorVentaLibro();
+  cargarSelectoresVenta();
   renderTablaLibrosRegistrados();
+  renderTablaClientes();
+  renderRenglonesVenta();
+  renderHistorial();
+  renderDetalleVacio();
 
   const campoBusqueda = document.getElementById('catalogo-busqueda');
   campoBusqueda.value = '';
@@ -368,8 +974,16 @@ function inicializar() {
   });
   campoBusqueda.addEventListener('input', renderCatalogo);
 
-  // Alta de libros.
+  // Alta de libros y clientes.
   document.getElementById('form-alta-libro').addEventListener('submit', manejarAltaLibro);
+  document.getElementById('form-alta-cliente').addEventListener('submit', manejarAltaCliente);
+
+  // Composición y confirmación de la venta.
+  document.getElementById('venta-agregar').addEventListener('click', manejarAgregarRenglon);
+  document.getElementById('venta-confirmar').addEventListener('click', manejarConfirmarVenta);
+
+  // Acceso al detalle desde el historial (delegación sobre el tbody).
+  document.getElementById('tabla-historial').querySelector('tbody').addEventListener('click', manejarClicHistorial);
 }
 
 if (document.readyState === 'loading') {

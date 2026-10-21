@@ -38,7 +38,7 @@
 
       <div class="tabla-contenedor">
         <table id="tabla-catalogo">
-          <caption>Listado de libros del catálogo (datos estáticos de ejemplo)</caption>
+          <caption>Listado de libros del catálogo</caption>
           <thead>
             <tr>
               <th scope="col">Título</th>
@@ -138,7 +138,7 @@
         </fieldset>
       </form>
 
-      <!-- Resultado de la operación (correcta o rechazada), texto "OK —" / "Error —" escrito por el JS futuro -->
+      <!-- Resultado de la operación (correcta o rechazada), texto "OK —" / "Error —" escrito por JavaScript -->
       <p id="libros-feedback" class="mensaje" role="status" aria-live="polite" hidden>Ejemplo de mensaje: OK — Libro registrado correctamente. O bien: Error — No se pudo registrar el libro (el motivo se explica en texto).</p>
 
       <h3>Libros registrados</h3>
@@ -147,7 +147,7 @@
 
       <div class="tabla-contenedor">
         <table id="tabla-libros">
-          <caption>Listado de libros registrados (datos estáticos de ejemplo)</caption>
+          <caption>Listado de libros registrados</caption>
           <thead>
             <tr>
               <th scope="col">Título</th>
@@ -183,7 +183,7 @@
     <section id="vista-clientes" aria-labelledby="titulo-clientes">
       <h2 id="titulo-clientes">Clientes</h2>
 
-      <form id="form-alta-cliente" aria-label="Formulario de alta de clientes">
+      <form id="form-alta-cliente" aria-label="Formulario de alta de clientes" novalidate>
         <fieldset>
           <legend>Registrar un cliente</legend>
 
@@ -203,7 +203,7 @@
         </fieldset>
       </form>
 
-      <!-- Resultado de la operación (correcta o rechazada), texto "OK —" / "Error —" escrito por el JS futuro -->
+      <!-- Resultado de la operación (correcta o rechazada), texto "OK —" / "Error —" escrito por JavaScript -->
       <p id="clientes-feedback" class="mensaje" role="status" aria-live="polite" hidden>Ejemplo de mensaje: OK — Cliente registrado correctamente. O bien: Error — No se pudo registrar el cliente (el motivo se explica en texto).</p>
 
       <h3>Clientes registrados</h3>
@@ -212,7 +212,7 @@
 
       <div class="tabla-contenedor">
         <table id="tabla-clientes">
-          <caption>Listado de clientes registrados (datos estáticos de ejemplo)</caption>
+          <caption>Listado de clientes registrados</caption>
           <thead>
             <tr>
               <th scope="col">Nombre completo</th>
@@ -281,13 +281,14 @@
 
       <div class="tabla-contenedor">
         <table id="tabla-renglones">
-          <caption>Renglones de la venta en composición (datos estáticos de ejemplo)</caption>
+          <caption>Renglones de la venta en composición</caption>
           <thead>
             <tr>
               <th scope="col">Libro</th>
               <th scope="col">Cantidad</th>
               <th scope="col">Precio unitario</th>
               <th scope="col">Subtotal</th>
+              <th scope="col">Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -296,12 +297,14 @@
               <td>2</td>
               <td>$1500,00</td>
               <td>$3000,00</td>
+              <td>—</td>
             </tr>
             <tr>
               <td>Cuentos de terror</td>
               <td>1</td>
               <td>$2000,00</td>
               <td>$2000,00</td>
+              <td>—</td>
             </tr>
           </tbody>
         </table>
@@ -314,7 +317,7 @@
 
       <button type="button" id="venta-confirmar">Confirmar venta</button>
 
-      <!-- Resultado de la operación (correcta o rechazada), texto "OK —" / "Error —" escrito por el JS futuro -->
+      <!-- Resultado de la operación (correcta o rechazada), texto "OK —" / "Error —" escrito por JavaScript -->
       <p id="venta-feedback" class="mensaje" role="status" aria-live="polite" hidden>Ejemplo de mensaje: OK — Venta confirmada. O bien: Error — No se pudo confirmar la venta (el motivo se explica en texto).</p>
     </section>
 
@@ -325,7 +328,7 @@
 
       <div class="tabla-contenedor">
         <table id="tabla-historial">
-          <caption>Ventas confirmadas (datos estáticos de ejemplo)</caption>
+          <caption>Ventas confirmadas</caption>
           <thead>
             <tr>
               <th scope="col">Identificador</th>
@@ -356,12 +359,12 @@
 
       <h3>Detalle de la venta seleccionada</h3>
 
-      <!-- Panel de detalle inmutable: el JS futuro renderiza aquí la venta elegida.
+      <!-- Panel de detalle inmutable: JavaScript renderiza aquí la venta elegida.
            No tiene (ni deberá tener) controles de edición o eliminación. -->
       <div id="tabla-historial-detalle">
         <div class="tabla-contenedor">
           <table>
-            <caption>Renglones de la venta V-0001 (datos estáticos de ejemplo, valores históricos)</caption>
+            <caption>Renglones de la venta seleccionada (valores históricos)</caption>
             <thead>
               <tr>
                 <th scope="col">Libro</th>

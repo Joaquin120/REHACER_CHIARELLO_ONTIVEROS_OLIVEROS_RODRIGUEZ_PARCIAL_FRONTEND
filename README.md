@@ -5,8 +5,7 @@ Trabajo Práctico Integrador de la materia **Programación III** de la **UTN —
 - **Materia:** Programación III
 - **Entrega:** TPI — Frontend de una librería
 - **Revisor de la unidad:** Prof. Matías Torres
-- **Etapa actual:** Ejercicio 2 — Presentación con CSS y uso adaptable
-- **Etapa actual:** Ejercicio 3 y parte de libros del Ejercicio 4 — datos locales, catálogo dinámico, filtro por título y alta de libros funcionales
+- **Etapa actual:** Ejercicios 3 a 6 completos — datos locales, catálogo, altas de libros y clientes, ventas simuladas, historial inmutable y persistencia en `localStorage`
 
 ## Integrantes del equipo
 
@@ -30,6 +29,15 @@ El proyecto no necesita servidor, npm, frameworks, CDNs ni conexión a internet.
 3. El navegador abre el archivo con el protocolo `file://` y muestra la aplicación completa.
 
 No hay pasos de instalación ni de compilación: solo HTML5, CSS3 y JavaScript nativo incluidos en el proyecto.
+
+## Persistencia en el navegador
+
+Los libros, clientes y ventas se conservan en `localStorage` del navegador, bajo la clave `libreriaElFaro.v1`. En el primer inicio se cargan los datos de ejemplo; en las aperturas siguientes se recuperan los registros guardados sin duplicar los ejemplos.
+
+- El almacenamiento depende del **navegador**, del **perfil** y de la **ubicación** desde la que se abre el proyecto: otra persona, otro perfil u otra carpeta no verá los datos guardados.
+- No se comparte información entre usuarios ni se envía nada a un servidor: todo queda en el equipo local.
+- Si el navegador bloquea `localStorage`, la aplicación sigue funcionando en memoria durante la sesión, pero los cambios no sobreviven a la recarga.
+- Para reiniciar los datos de prueba hay que abrir las herramientas de desarrollo del navegador y ejecutar `localStorage.removeItem('libreriaElFaro.v1')`, y luego recargar la página.
 
 ## Arquitectura de vistas e IDs del HTML
 
@@ -75,49 +83,44 @@ No hay pasos de instalación ni de compilación: solo HTML5, CSS3 y JavaScript n
 | Detalle de venta | `tabla-historial-detalle` | Panel de detalle inmutable de la venta elegida |
 | Historial vacío | `historial-listado-vacio` | Mensaje cuando no hay ventas |
 
-Convenciones: todas las tablas de listado están dentro de un `<div class="tabla-contenedor">` (futuro desplazamiento propio con `overflow-x: auto`), y los mensajes de estado usan las clases `.mensaje` y `.listado-vacio`.
+Convenciones: todas las tablas de listado están dentro de un `<div class="tabla-contenedor">` (con `overflow-x: auto` para desplazamiento propio), y los mensajes de estado usan las clases `.mensaje` y `.listado-vacio`. La tabla de renglones agrega una columna de acciones con el campo de cantidad y el botón para quitar cada renglón.
 
-Estos IDs son un contrato público: los ejercicios siguientes (CSS, datos, altas, ventas y persistencia) los usan sin renombrarlos.
+Estos IDs son un contrato público: la implementación de datos, altas, ventas y persistencia los usa sin renombrarlos.
 
 ## Estado de la maqueta vs. dinámico
 
-| Parte | Estado actual | Qué falta (ejercicios siguientes) |
+| Parte | Estado actual | Qué falta |
 |---|---|---|
-| Navegación por anclas entre las 5 vistas | Funcional (HTML nativo) | Señalar la vista actual con `aria-current` desde JS |
+| Navegación por anclas entre las 5 vistas | Funcional (HTML nativo) | Señalar la vista actual con `aria-current` desde JS (mejora opcional) |
 | Catálogo: listado y datos de ejemplo | Funcional (JS) — `js/app.js` genera el listado desde los datos locales (Ejercicio 3) | — |
 | Catálogo: buscador por título | Funcional (JS) — filtro insensible a mayúsculas, parcial y con `trim` (Ejercicio 3) | — |
-| Libros: formulario de alta | Funcional para libros (JS): selectores dinámicos y validaciones con `preventDefault` (Ejercicio 4) | Alta de clientes (Ejercicio 4) |
+| Libros: formulario de alta | Funcional (JS): selectores dinámicos y validaciones con `preventDefault` (Ejercicio 4) | — |
 | Libros: listado de registrados | Funcional (JS) — renderizado dinámico con estado vacío (Ejercicio 4) | — |
-| Clientes: formulario de alta | Maqueta estática | Validaciones y alta con `preventDefault` (Ejercicio 4) |
-| Clientes: listado de registrados | Maqueta estática | Renderizado dinámico (Ejercicio 4) |
-| Ventas: composición y renglones | Maqueta estática | Agregar/modificar renglones, cálculo de subtotales y total (Ejercicio 5) |
-| Ventas: confirmación | Maqueta estática | Registro de la venta y mensaje de resultado (Ejercicio 5) |
-| Historial: listado y detalle | Maqueta estática | Detalle inmutable desde valores históricos (Ejercicio 5) |
-| Mensajes de estado (`.mensaje`, `*-feedback`, `*-vacio`) | Presentes en el HTML, ocultos (`hidden`) | Activación y textos desde JavaScript (Ejercicios 3–5) |
-| Selects de editorial, género y autores | Opciones de ejemplo estáticas | Generados desde los datos locales (Ejercicio 4) |
-| Estilos | CSS propio completo (`css/estilos.css`): identidad visual con variables, Flexbox/Grid, adaptación 320 px / 1280 px y foco visible (Ejercicio 2) | Mantener la coherencia visual al agregar los comportamientos dinámicos (Ejercicios 3–6) |
-| Accesibilidad visual | Foco visible con `:focus-visible`; mensajes de estado y listas vacías diferenciados por borde e ícono, no solo por color | Conservar esos estados cuando JavaScript los active (Ejercicios 3–5) |
-| Mensajes de estado (`.mensaje`, `*-feedback`, `*-vacio`) | Catálogo y libros: activados desde JS. Resto: ocultos (`hidden`) | Activación y textos desde JavaScript para clientes, ventas e historial (Ejercicios 4–5) |
+| Clientes: formulario de alta | Funcional (JS) — validaciones con `preventDefault` y feedback (Ejercicio 4) | — |
+| Clientes: listado de registrados | Funcional (JS) — renderizado dinámico con estado vacío (Ejercicio 4) | — |
+| Ventas: composición y renglones | Funcional (JS) — agregar, modificar cantidad y quitar renglones; subtotales y total (Ejercicio 5) | — |
+| Ventas: confirmación | Funcional (JS) — registra la venta y muestra el resultado (Ejercicio 5) | — |
+| Historial: listado y detalle | Funcional (JS) — listado dinámico y detalle inmutable desde valores históricos (Ejercicio 5) | — |
+| Mensajes de estado (`.mensaje`, `*-feedback`, `*-vacio`) | Activados desde JavaScript en catálogo, libros, clientes, ventas e historial (Ejercicios 3–5) | — |
 | Selects de editorial, género y autores | Funcional (JS) — opciones generadas desde los datos locales (Ejercicio 4) | — |
-| Estilos | CSS mínimo propio (`css/estilos.css`) para legibilidad | Identidad visual completa, Flexbox/Grid y responsive 320 px / 1280 px (Ejercicio 2) |
-| Persistencia | No implementada | `localStorage` (Ejercicio 6) |
+| Persistencia | Funcional (JS) — libros, clientes y ventas en `localStorage` (Ejercicio 6) | — |
+| Estilos | CSS propio completo (`css/estilos.css`): identidad visual con variables, Flexbox/Grid, adaptación 320 px / 1280 px y foco visible (Ejercicio 2) | — |
+| Accesibilidad visual | Foco visible con `:focus-visible`; mensajes de estado y listas vacías diferenciados por borde e ícono, no solo por color | — |
 
 ## Casos de prueba manuales
 
-Los 8 casos obligatorios de la consigna (`openspec/consignas.md`):
+Los 8 casos obligatorios de la consigna (`openspec/consignas.md`) son ejecutables en esta versión:
 
-| # | Acción | Resultado esperado |
-|---|---|---|
-| 1 | Búsqueda con una parte del título en mayúsculas; luego búsqueda vacía y texto inexistente | Coincidencias sin distinguir mayúsculas; catálogo completo; mensaje sin resultados |
-| 2 | Alta de libro con ISBN existente y luego con ISBN nuevo | El duplicado se rechaza; el válido aparece en catálogo y selección de venta |
-| 3 | Alta de cliente con email inválido, email existente en mayúsculas y email nuevo | Se rechazan los dos primeros; el nuevo aparece en listado y selección |
-| 4 | Venta sin cliente, cantidad cero, negativa o decimal; libro repetido | No se confirma; el duplicado no crea otro renglón |
-| 5 | Venta válida: dos unidades a 1500 y una a 2000 | Subtotales 3000 y 2000; total 5000; detalle conservado en el historial |
-| 6 | Venta confirmada y cambio exclusivo del precio de catálogo guardado, en una copia de prueba del proyecto | Al consultar nuevamente el historial después de recargar, el precio unitario, los subtotales y el total de esa venta conservan los valores confirmados |
-| 7 | Recarga después de altas y venta | Se recuperan datos sin duplicar ejemplos ni ventas |
-| 8 | Navegación por teclado y anchos de 320 px y 1280 px | Foco visible, controles utilizables y tabla con desplazamiento propio si lo necesita |
-
-> Los casos 1 a 7 se ejecutan sobre la versión completa del TPI (Ejercicios 3 a 6); hoy el proyecto está en la Etapa 2 (CSS del Ejercicio 2). El caso 8 se verificó sobre la maqueta estilizada y se vuelve a comprobar en el cierre.
+| # | Acción | Resultado esperado | Estado en esta entrega |
+|---|---|---|---|
+| 1 | Búsqueda con una parte del título en mayúsculas; luego búsqueda vacía y texto inexistente | Coincidencias sin distinguir mayúsculas; catálogo completo; mensaje sin resultados | Verificado |
+| 2 | Alta de libro con ISBN existente y luego con ISBN nuevo | El duplicado se rechaza; el válido aparece en catálogo y selección de venta | Verificado |
+| 3 | Alta de cliente con email inválido, email existente en mayúsculas y email nuevo | Se rechazan los dos primeros; el nuevo aparece en listado y selección | Verificado |
+| 4 | Venta sin cliente, cantidad cero, negativa o decimal; libro repetido | No se confirma; el duplicado no crea otro renglón | Verificado |
+| 5 | Venta válida: dos unidades a 1500 y una a 2000 | Subtotales 3000 y 2000; total 5000; detalle conservado en el historial | Verificado |
+| 6 | Venta confirmada y cambio exclusivo del precio de catálogo guardado, en una copia de prueba del proyecto | Al consultar nuevamente el historial después de recargar, el precio unitario, los subtotales y el total de esa venta conservan los valores confirmados | Verificado |
+| 7 | Recarga después de altas y venta | Se recuperan datos sin duplicar ejemplos ni ventas | Verificado |
+| 8 | Navegación por teclado y anchos de 320 px y 1280 px | Foco visible, controles utilizables y tabla con desplazamiento propio si lo necesita | Verificado; incluye navegación por teclado y anchos de 320 px / 1280 px (ver registro detallado abajo). |
 
 ### Registro de verificación — caso 8 (Ejercicio 2)
 
@@ -131,16 +134,10 @@ Verificación realizada el 20/10/2026 abriendo `index.html` por `file://` en Mic
 | Foco visible | `:focus-visible` con `outline` de 3 px y `offset` de 2 px en todos los controles; en la cabecera se usa un tono claro de alto contraste |
 | Mensajes de estado | Éxito (✓), error (✕) y listas vacías (—) se distinguen por borde e ícono además del color; los 9 elementos `[hidden]` permanecen ocultos |
 | Formularios y controles | Legibles y utilizables en 320 px (una columna, botones a ancho completo) y en 1280 px (grilla de varias columnas con contenido centrado) |
-> Hoy ya se pueden ejecutar los casos 1 y 2 en lo que respecta al catálogo y a las altas de libros (Ejercicio 3 y parte de libros del Ejercicio 4). Los casos 3 a 7 requieren la versión completa del TPI (resto del Ejercicio 4, Ejercicios 5 y 6). El caso 8 se puede recorrer con la maqueta.
 
 ## Estructura del proyecto
-
-```
-index.html        ← entrada única (doble clic)
-css/estilos.css   ← identidad visual, layout adaptable y accesibilidad (Ejercicio 2)
-js/app.js         ← JavaScript nativo (aún sin lógica; la funcionalidad llega en los Ejercicios 3 a 6)
-css/estilos.css   ← estilos mínimos de la maqueta
-js/app.js         ← JavaScript nativo (Ejercicio 3 y parte de libros del Ejercicio 4 implementados; faltan clientes, ventas y persistencia)
-openspec/         ← especificaciones del trabajo (consignas.md y changes/)
-README.md         ← este archivo
-```
+index.html         ← entrada única (doble clic)
+css/estilos.css    ← identidad visual, layout adaptable y accesibilidad (Ejercicio 2)
+js/app.js          ← JavaScript nativo (Ejercicios 3 a 6: datos, catálogo, altas, ventas, historial y persistencia)
+openspec/          ← especificaciones del trabajo (consignas.md y changes/)
+README.md          ← este archivo
